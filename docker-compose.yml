@@ -7,7 +7,7 @@ services:
     command: sh -c "node --version && npm --version && cd /app && npm i && node server.js"
     ports:
       - "3000:3002"
-      - "1339:1339"
+      - "1338:1339"
 
   alert-decoder:
     image: node:14-alpine
