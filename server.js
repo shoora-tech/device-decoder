@@ -74,6 +74,7 @@ function handlerLotin(connection){
         let dataLength = data.length
         let dataLengthFlag = data.slice(8, 9)
         deviceDataObj["dataInsertionFlag"] = true
+        deviceDataObj['raw_hex_data'] = data
       if(data.slice(0, 2).toLowerCase() == '7e' ){
         if(parseInt(data.slice(2, 4),16) == 2){
           if(dataLengthFlag === '32' && dataLengthFlag === 132){
@@ -227,11 +228,11 @@ async function insertSQSDataInDB(data,uuid) {
         const query = `INSERT INTO alert_realtimedatabase (uuid, location_packet_type, message_body_length, imei,
                                                            message_serial_number, alarm_series, terminal_status,
                                                            ignition_status, latitude, longitude, height, speed,
-                                                           direction, created_at, updated_at, is_corrupt)
+                                                           direction, created_at, updated_at, is_corrupt, raw_hex_data)
                        VALUES ('${uuid}', ${data.locationPacketType}, '${data.messageBodyLength}',
                                '${data.phoneNumber}', '${data.msgSerialNumber}', '${data.alarmSeries}',
                                '${data.terminalStatus}', ${iStatus}, ${data.latitute}, ${data.longitute},
-                               ${data.height}, ${data.speed}, ${data.direction}, '${date}', '${date}', '${data.is_corrupt}')
+                               ${data.height}, ${data.speed}, ${data.direction}, '${date}', '${date}', '${data.is_corrupt}', '${data.raw_hex_data}')
         `;
 
 
