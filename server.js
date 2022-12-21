@@ -71,8 +71,23 @@ function handlerLotin(connection){
         //console.log('data before hex conversion',data);
         data = data.toString('hex');
         console.log('Data from device--->',data);
+        let dataLength = data.length
+        let dataLengthFlag = data.slice(8, 9)
+        deviceDataObj["dataInsertionFlag"] = true
       if(data.slice(0, 2).toLowerCase() == '7e' ){
         if(parseInt(data.slice(2, 4),16) == 2){
+          if(dataLengthFlag === '32' && dataLengthFlag === 132){
+            deviceDataObj["dataInsertionFlag"] = false
+          }
+          if(dataLengthFlag === '34' && dataLengthFlag === 136){
+            deviceDataObj["dataInsertionFlag"] = false
+          }
+          if(dataLengthFlag === '36' && dataLengthFlag === 140){
+            deviceDataObj["dataInsertionFlag"] = false
+          }
+          if(dataLengthFlag === '3c' && dataLengthFlag === 152){
+            deviceDataObj["dataInsertionFlag"] = false
+          }
            deviceDataObj['uuid'] = randomUUID();
            deviceDataObj['identifier'] = data.slice(0, 2);
            deviceDataObj['locationPacketType'] = parseInt(data.slice(2, 4),16);
@@ -157,7 +172,15 @@ function handlerLotin(connection){
 
            //let sqsData = await readFromSQS();
            //console.log("sqsData",sqsData)
-            await insertSQSDataInDB(deviceDataObj,deviceDataObj.uuid)
+           if(deviceDataObj["dataInsertionFlag"]){
+            deviceDataObj["is_corrupt"] = false
+            
+           }
+           else{
+            deviceDataObj["is_corrupt"] = true
+           }
+           await insertSQSDataInDB(deviceDataObj,deviceDataObj.uuid)
+            
         }
      }
     }catch(e){
@@ -204,11 +227,11 @@ async function insertSQSDataInDB(data,uuid) {
         const query = `INSERT INTO alert_realtimedatabase (uuid, location_packet_type, message_body_length, imei,
                                                            message_serial_number, alarm_series, terminal_status,
                                                            ignition_status, latitude, longitude, height, speed,
-                                                           direction, created_at, updated_at)
+                                                           direction, created_at, updated_at, is_corrupt)
                        VALUES ('${uuid}', ${data.locationPacketType}, '${data.messageBodyLength}',
                                '${data.phoneNumber}', '${data.msgSerialNumber}', '${data.alarmSeries}',
                                '${data.terminalStatus}', ${iStatus}, ${data.latitute}, ${data.longitute},
-                               ${data.height}, ${data.speed}, ${data.direction}, '${date}', '${date}')
+                               ${data.height}, ${data.speed}, ${data.direction}, '${date}', '${date}', '${data.is_corrupt}')
         `;
 
 
