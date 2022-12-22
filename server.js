@@ -77,16 +77,19 @@ function handlerLotin(connection){
         deviceDataObj['raw_hex_data'] = data
       if(data.slice(0, 2).toLowerCase() == '7e' ){
         if(parseInt(data.slice(2, 4),16) == 2){
-          if(dataLengthFlag === '32' && dataLengthFlag === 132){
+          if(dataLengthFlag === '32' && dataLength === 132){
             deviceDataObj["dataInsertionFlag"] = false
           }
-          if(dataLengthFlag === '34' && dataLengthFlag === 136){
+          if(dataLengthFlag === '34' && dataLength === 136){
             deviceDataObj["dataInsertionFlag"] = false
           }
-          if(dataLengthFlag === '36' && dataLengthFlag === 140){
+          if(dataLengthFlag === '36' && dataLength === 140){
             deviceDataObj["dataInsertionFlag"] = false
           }
-          if(dataLengthFlag === '3c' && dataLengthFlag === 152){
+          if(dataLengthFlag === '38' && dataLength === 144){
+            deviceDataObj["dataInsertionFlag"] = false
+          }
+          if(dataLengthFlag === '3c' && dataLength === 152){
             deviceDataObj["dataInsertionFlag"] = false
           }
            deviceDataObj['uuid'] = randomUUID();
