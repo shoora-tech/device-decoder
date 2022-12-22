@@ -72,7 +72,7 @@ function handlerLotin(connection){
         data = data.toString('hex');
         console.log('Data from device--->',data);
         let dataLength = data.length
-        let dataLengthFlag = data.slice(8, 9)
+        let dataLengthFlag = data.slice(8, 10)
         deviceDataObj["dataInsertionFlag"] = true
         deviceDataObj['raw_hex_data'] = data
       if(data.slice(0, 2).toLowerCase() == '7e' ){
