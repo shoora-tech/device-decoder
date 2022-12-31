@@ -250,6 +250,18 @@ async function insertSQSDataInDB(data,uuid) {
             return true;
 
         });
+        // Insert data in device table, gps_id, and device_status
+        
+        const update_query = `UPDATE alert_device SET ignition_status = '${data.terminalStatus}', speed= '${data.speed}' WHERE imei_number = '${data.phoneNumber}';`
+        client.query(update_query, (err, res) => {
+          if (err) {
+              console.error(err);
+              return;
+          }
+          console.log('Device updated successfully');
+          return true;
+
+      });
         //
         // const sequelize = new Sequelize(DB_DETAILS.database, DB_DETAILS.username, DB_DETAILS.password, {
         //     host: DB_DETAILS.endpoint,
