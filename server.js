@@ -252,7 +252,7 @@ async function insertSQSDataInDB(data,uuid) {
         });
         // Insert data in device table, gps_id, and device_status
         
-        const update_query = `UPDATE alert_device SET ignition_status = '${data.terminalStatus}', speed= '${data.speed}' WHERE imei_number = '${data.phoneNumber}';`
+        const update_query = `UPDATE device_device SET ignition_status = '${data.terminalStatus}', speed= '${data.speed}' WHERE imei_number = '${data.phoneNumber}';`
         client.query(update_query, (err, res) => {
           if (err) {
               console.error(err);
