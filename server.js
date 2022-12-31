@@ -239,11 +239,11 @@ async function insertSQSDataInDB(data,uuid) {
         `;
 
 
-        console.log(query)
+        console.log("rt query -> ", query)
 
         client.query(query, (err, res) => {
             if (err) {
-                console.error(err);
+                console.error("rt error ",err);
                 return;
             }
             console.log('Data insert successful');
@@ -253,9 +253,10 @@ async function insertSQSDataInDB(data,uuid) {
         // Insert data in device table, gps_id, and device_status
         
         const update_query = `UPDATE device_device SET ignition_status = '${iStatus}', speed= '${data.speed}' WHERE imei_number = '${data.phoneNumber}';`
+        console.log("update query -> ", update_query)
         client.query(update_query, (err, res) => {
           if (err) {
-              console.error(err);
+              console.error("update error ", err);
               return;
           }
           console.log('Device updated successfully');
