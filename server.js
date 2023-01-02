@@ -73,25 +73,40 @@ function handlerLotin(connection){
         console.log('Data from device--->',data);
         let dataLength = data.length
         let dataLengthFlag = data.slice(8, 10)
-        deviceDataObj["dataInsertionFlag"] = true
+        deviceDataObj["dataInsertionFlag"] = false
         deviceDataObj['raw_hex_data'] = data
       if(data.slice(0, 2).toLowerCase() == '7e' ){
         if(parseInt(data.slice(2, 4),16) == 2){
-          if(dataLengthFlag === '32' && dataLength === 132){
-            deviceDataObj["dataInsertionFlag"] = false
+          if(dataLengthFlag === '32' && dataLength === 130){
+            deviceDataObj["dataInsertionFlag"] = true
           }
-          if(dataLengthFlag === '34' && dataLength === 136){
-            deviceDataObj["dataInsertionFlag"] = false
+          if(dataLengthFlag === '34' && dataLength === 134){
+            deviceDataObj["dataInsertionFlag"] = true
           }
-          if(dataLengthFlag === '36' && dataLength === 140){
-            deviceDataObj["dataInsertionFlag"] = false
+          if(dataLengthFlag === '36' && dataLength === 138){
+            deviceDataObj["dataInsertionFlag"] = true
           }
-          if(dataLengthFlag === '38' && dataLength === 144){
-            deviceDataObj["dataInsertionFlag"] = false
+          if(dataLengthFlag === '38' && dataLength === 142){
+            deviceDataObj["dataInsertionFlag"] = true
           }
-          if(dataLengthFlag === '3c' && dataLength === 152){
-            deviceDataObj["dataInsertionFlag"] = false
+          if(dataLengthFlag === '3c' && dataLength === 150){
+            deviceDataObj["dataInsertionFlag"] = true
           }
+          // if(dataLengthFlag === '32' && dataLength === 132){
+          //   deviceDataObj["dataInsertionFlag"] = false
+          // }
+          // if(dataLengthFlag === '34' && dataLength === 136){
+          //   deviceDataObj["dataInsertionFlag"] = false
+          // }
+          // if(dataLengthFlag === '36' && dataLength === 140){
+          //   deviceDataObj["dataInsertionFlag"] = false
+          // }
+          // if(dataLengthFlag === '38' && dataLength === 144){
+          //   deviceDataObj["dataInsertionFlag"] = false
+          // }
+          // if(dataLengthFlag === '3c' && dataLength === 152){
+          //   deviceDataObj["dataInsertionFlag"] = false
+          // }
            deviceDataObj['uuid'] = randomUUID();
            deviceDataObj['identifier'] = data.slice(0, 2);
            deviceDataObj['locationPacketType'] = parseInt(data.slice(2, 4),16);
@@ -127,6 +142,7 @@ function handlerLotin(connection){
            deviceDataObj['height'] = parseInt(data.slice(58, 62),16);
            deviceDataObj['speed'] = parseInt(data.slice(62, 66),16)/10;
            deviceDataObj['direction'] = parseInt(data.slice(66, 70),16);
+           deviceDataObj['device_time'] = data.slice(70, 82);
            deviceDataObj['created_at'] = new Date() ;
            deviceDataObj['updated_at'] = new Date() ;
 
@@ -231,11 +247,11 @@ async function insertSQSDataInDB(data,uuid) {
         const query = `INSERT INTO alert_realtimedatabase (uuid, location_packet_type, message_body_length, imei,
                                                            message_serial_number, alarm_series, terminal_status,
                                                            ignition_status, latitude, longitude, height, speed,
-                                                           direction, created_at, updated_at, is_corrupt, raw_hex_data)
+                                                           direction, created_at, updated_at, is_corrupt, raw_hex_data, device_time)
                        VALUES ('${uuid}', ${data.locationPacketType}, '${data.messageBodyLength}',
                                '${data.phoneNumber}', '${data.msgSerialNumber}', '${data.alarmSeries}',
                                '${data.terminalStatus}', ${iStatus}, ${data.latitute}, ${data.longitute},
-                               ${data.height}, ${data.speed}, ${data.direction}, '${date}', '${date}', '${data.is_corrupt}', '${data.raw_hex_data}')
+                               ${data.height}, ${data.speed}, ${data.direction}, '${date}', '${date}', '${data.is_corrupt}', '${data.raw_hex_data}', '${data.device_time}')
         `;
 
 
