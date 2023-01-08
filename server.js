@@ -236,8 +236,8 @@ async function insertSQSDataInDB(data,uuid) {
         console.error("unable to get org error ", err);
     }
     console.log("organization found")
+    console.log(res.rows.length)
     if(res.rows.length > 0){
-      console.log(res.rows[0].organization_id)
       org_id = parseInt(res.rows[0].organization_id);
       console.log("organization id is ")
       console.log(org_id)
