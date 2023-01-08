@@ -174,24 +174,11 @@ function handlerLotin(connection){
            //deviceDataObj['unknownadditionalInfLength'] = parseInt(data.slice(96, 98),16);
            deviceDataObj['gsmNetworkStrength'] = parseInt(data.slice(98, 102),16);
            deviceDataObj['numberofSatelite'] = parseInt(data.slice(124, 126),16);
-
-           console.log("JSON.stringify(deviceDataObj)",deviceDataObj);
            var params = {
             MessageBody: JSON.stringify(deviceDataObj),
             QueueUrl: queryURL
            };
 
-           //console.log("Testing ",JSON.stringify(params))
-           /*sqs.sendMessage(params, function(err, data) {
-            if (err) {
-              console.log("Error", err);
-            } else {
-              
-            }
-           });*/
-
-           //let sqsData = await readFromSQS();
-           //console.log("sqsData",sqsData)
            if(deviceDataObj["dataInsertionFlag"]){
             deviceDataObj["is_corrupt"] = false
             
@@ -242,9 +229,9 @@ async function insertSQSDataInDB(data,uuid) {
         }else {
             var iStatus = false
         }
-	console.log(data);
   // fetch organization_id from the imei number
   const org_query = `SELECT organization_id from device_device WHERE imei_number='${data.phoneNumber}}'`
+  console.log("org query ", org_query)
   client.query(org_query, (err, res) => {
     if (err) {
         console.error("unable to get org error ", err);
