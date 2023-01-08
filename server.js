@@ -229,7 +229,7 @@ async function insertSQSDataInDB(data,uuid) {
             var iStatus = false
         }
   // fetch organization_id from the imei number
-  const org_query = `SELECT organization_id from device_device WHERE imei_number='${data.phoneNumber}}'`
+  const org_query = `SELECT organization_id from device_device WHERE imei_number='${data.phoneNumber}'`
   console.log("org query ", org_query)
   client.query(org_query, (err, res) => {
     if (err) {
