@@ -243,19 +243,27 @@ async function insertSQSDataInDB(data,uuid) {
             var iStatus = false
         }
 	console.log(data);
-        var date = new Date().toISOString().slice(0, 19).replace('T', ' ');
-        const query = `INSERT INTO alert_realtimedatabase (uuid, location_packet_type, message_body_length, imei,
-                                                           message_serial_number, alarm_series, terminal_status,
-                                                           ignition_status, latitude, longitude, height, speed,
-                                                           direction, created_at, updated_at, is_corrupt, raw_hex_data, device_time)
-                       VALUES ('${uuid}', ${data.locationPacketType}, '${data.messageBodyLength}',
-                               '${data.phoneNumber}', '${data.msgSerialNumber}', '${data.alarmSeries}',
-                               '${data.terminalStatus}', ${iStatus}, ${data.latitute}, ${data.longitute},
-                               ${data.height}, ${data.speed}, ${data.direction}, '${date}', '${date}', '${data.is_corrupt}', '${data.raw_hex_data}', '${data.device_time}')
-        `;
-
-
-        console.log("rt query -> ", query)
+  // fetch organization_id from the imei number
+  const org_query = `SELECT organization_id from device_device WHERE imei_number='${data.phoneNumber}}'`
+  client.query(org_query, (err, res) => {
+    if (err) {
+        console.error("unable to get org error ", err);
+    }
+    if(res.rows.length > 0){
+      console.log(res.rows[0].organization_id)
+      org_id = parseInt(res.rows[0].organization_id);
+      console.log("organization id is ")
+      console.log(org_id)
+      var date = new Date().toISOString().slice(0, 19).replace('T', ' ');
+      const query = `INSERT INTO alert_realtimedatabase (uuid, location_packet_type, message_body_length, imei,
+                                                          message_serial_number, alarm_series, terminal_status,
+                                                          ignition_status, latitude, longitude, height, speed,
+                                                          direction, created_at, updated_at, is_corrupt, raw_hex_data, device_time, organization_id)
+                      VALUES ('${uuid}', ${data.locationPacketType}, '${data.messageBodyLength}',
+                              '${data.phoneNumber}', '${data.msgSerialNumber}', '${data.alarmSeries}',
+                              '${data.terminalStatus}', ${iStatus}, ${data.latitute}, ${data.longitute},
+                              ${data.height}, ${data.speed}, ${data.direction}, '${date}', '${date}', '${data.is_corrupt}', '${data.raw_hex_data}', '${data.device_time}', ${org_id})
+      `;
 
         client.query(query, (err, res) => {
             if (err) {
@@ -279,6 +287,12 @@ async function insertSQSDataInDB(data,uuid) {
           return true;
 
       });
+  }
+    
+
+});
+
+        
         //
         // const sequelize = new Sequelize(DB_DETAILS.database, DB_DETAILS.username, DB_DETAILS.password, {
         //     host: DB_DETAILS.endpoint,
