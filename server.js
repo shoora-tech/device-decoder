@@ -70,7 +70,6 @@ function handlerLotin(connection){
 	//console.log('DATA ' + connection.remoteAddress + ': ' + data);
         //console.log('data before hex conversion',data);
         data = data.toString('hex');
-        console.log('Data from device--->',data);
         let dataLength = data.length
         let dataLengthFlag = data.slice(8, 10)
         deviceDataObj["dataInsertionFlag"] = false
@@ -236,6 +235,7 @@ async function insertSQSDataInDB(data,uuid) {
     if (err) {
         console.error("unable to get org error ", err);
     }
+    console.log("organization found")
     if(res.rows.length > 0){
       console.log(res.rows[0].organization_id)
       org_id = parseInt(res.rows[0].organization_id);
@@ -278,119 +278,6 @@ async function insertSQSDataInDB(data,uuid) {
     
 
 });
-
-        
-        //
-        // const sequelize = new Sequelize(DB_DETAILS.database, DB_DETAILS.username, DB_DETAILS.password, {
-        //     host: DB_DETAILS.endpoint,
-        //     dialect: 'postgres'
-        // });
-        //
-        // // const Device = sequelize.define('alert_realtimedatabase', {
-        // //     // attributes
-        // //     id: {
-        // //         type: Sequelize.UUID,
-        // //         defaultValue: Sequelize.UUIDV4,
-        // //         primaryKey: true,
-        // //     },
-        // //     location_packet_type: {
-        // //         type: DataTypes.STRING,
-        // //         allowNull: false
-        // //     },
-        // //     message_body_length: {
-        // //         type: DataTypes.STRING,
-        // //         allowNull: false
-        // //     },
-        // //     imei: {
-        // //         type: DataTypes.STRING,
-        // //         allowNull: false
-        // //     },
-        // //     message_serial_number: {
-        // //         type: DataTypes.STRING,
-        // //         allowNull: false
-        // //     },
-        // //     alarm_series: {
-        // //         type: DataTypes.STRING,
-        // //         allowNull: false
-        // //     },
-        // //     terminal_status: {
-        // //         type: DataTypes.STRING,
-        // //         allowNull: false
-        // //     },
-        // //     ignition_status: {
-        // //         type: DataTypes.STRING,
-        // //         allowNull: false
-        // //     },
-        // //     latitude: {
-        // //         type: DataTypes.STRING,
-        // //         allowNull: false
-        // //     },
-        // //     longitude: {
-        // //         type: DataTypes.STRING,
-        // //         allowNull: false
-        // //     },
-        // //     height: {
-        // //         type: DataTypes.STRING,
-        // //         allowNull: false
-        // //     },
-        // //     speed: {
-        // //         type: DataTypes.STRING,
-        // //         allowNull: false
-        // //     },
-        // //     directions: {
-        // //         type: DataTypes.STRING,
-        // //         allowNull: false
-        // //     },
-        // //     oraganization: {
-        // //         type: DataTypes.STRING,
-        // //         allowNull: false
-        // //     },
-        // //
-        // // });
-        //
-        //
-        //     await sequelize.authenticate();
-        //     await sequelize.sync({alter: true})
-        //
-        //     console.log("alert_realtimedatabase",{
-        //         "uuid" : randomUUID() ,
-        //         "identifier":data.identifier,
-        //         "location_packet_type": data.locationPacketType,
-        //         "message_body_length": data.messageBodyLength,
-        //         "imei":data.phoneNumber,
-        //         "message_serial_number":data.msgSerialNumber,
-        //         "alarm_series":data.alarmSeries,
-        //         "terminal_status":data.terminalStatus,
-        //         "ignition_status": data.ignitionStatus,
-        //         "latitude":data.latitute,
-        //         "longitude":data.longitute,
-        //         "height":data.height,
-        //         "speed":data.speed,
-        //         "directions":data.direction,
-        //         "oraganization":"oraganization",
-        //         "created_at" : new Date(),
-        //         "updated_at" : new Date() ,
-        //     })
-        //
-        //     const resultData = await Device.create({
-        //         "uuid" : randomUUID() ,
-        //         "identifier":data.identifier,
-        //         "location_packet_type": data.locationPacketType,
-        //         "message_body_length": data.messageBodyLength,
-        //         "imei":data.phoneNumber,
-        //         "message_serial_number":data.msgSerialNumber,
-        //         "alarm_series":data.alarmSeries,
-        //         "terminal_status":data.terminalStatus,
-        //         "ignition_status": data.ignitionStatus,
-        //         "latitude":data.latitute,
-        //         "longitude":data.longitute,
-        //         "height":data.height,
-        //         "speed":data.speed,
-        //         "directions":data.direction,
-        //         "oraganization":"oraganization",
-        //         "created_at" : new Date(),
-        //         "updated_at" : new Date() ,
-        //     });
 
     } catch (error) {
         console.error('Something went Wrong :', error);
