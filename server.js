@@ -305,7 +305,6 @@ async function insertSQSDataInDB(data,uuid) {
                                 raw_hex_data = EXCLUDED.raw_hex_data,
                                 device_time = EXCLUDED.device_time,
                                 organization_id = EXCLUDED.organization_id`;
-      console.log("update query -> ", update_latest_rt_query)
       client.query(update_latest_rt_query, (err, res) => {
         if (err) {
             console.error("update error ", err);
