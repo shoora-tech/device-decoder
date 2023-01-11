@@ -2,14 +2,15 @@ const express = require('express');
 const app = express();
 app.use(express.json());
 const { randomUUID } = require('crypto');
+require('dotenv').config();
 
 const DB_DETAILS = {
-    "database":"shoora_fleet_management",
-    "username":"shoora",
-    "password":"u=4k)s&nen-&h#_3%_&+f#ieom(ztk$w)!#4azqruzofhavs99",
-    "auth_type":"password authentication",
-    "endpoint": "shoorabackend.caaj1e4fnlaq.ap-south-1.rds.amazonaws.com",
-    "port": "5432"
+    "database":process.env.database,
+    "username":process.env.username,
+    "password":process.env.password,
+    "auth_type":process.env.auth_type,
+    "endpoint": process.env.endpoint,
+    "port": process.env.port
 }
 
 const { Client } = require('pg');
@@ -32,9 +33,9 @@ const redis = require('redis');
 // });
 
 const client = redis.createClient({
-    host: '13.235.36.201',
-    port: 6379,
-    password: "shoora123"
+    host: process.env.REDIS_HOST,
+    port: process.env.REDIS_PORT,
+    password: process.env.REDIS_PASSWORD
 });
 
 function degreesToRadians(degrees) {
@@ -212,7 +213,7 @@ function GeoFunction(imei, spotCoordinates, db_client){
         
 }
 // ["26.79296", "79.02924"]
-// GeoFunction("784087664163", ["40.79296", "79.02924"], db_client)
+GeoFunction("784087664163", ["40.79296", "79.02924"], db_client)
 
 
 // function InsideGeoChecker(current ){}

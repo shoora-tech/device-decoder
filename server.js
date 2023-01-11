@@ -6,18 +6,18 @@ var AWS = require('aws-sdk');
 const { resolve } = require("path");
 const { randomUUID } = require('crypto'); // Added in: node v14.17.0
 const geofence = require('./geofence.js')
-
+require('dotenv').config();
 
 AWS.config.update({
-    region: 'ap-south-1',
-    accessKeyId: 'AKIAX7BFP72C6Z774WVT',
-    secretAccessKey: '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',
-    endpoint: new AWS.Endpoint('https://sqs.ap-south-1.amazonaws.com/'),
+    region: process.env.region,
+    accessKeyId: process.env.accessKeyId,
+    secretAccessKey: process.env.secretAccessKey,
+    endpoint: new AWS.Endpoint(process.env.endpoint),
 });
 
 
 var sqs = new AWS.SQS();
-const queryURL = "https://sqs.ap-south-1.amazonaws.com/547686973061/video-telematics";
+const queryURL = process.env.queryURL;
 
 var connectionArr = {};
 var tcpServer = net.createServer(handlerLotin).listen(1339);
@@ -25,14 +25,16 @@ var deviceDataObj = {};
 
 const sequelize = require('sequelize')
 const {Sequelize, DataTypes} = require("sequelize");
- const DB_DETAILS = {
-     "database":"shoora_fleet_management",
-     "username":"shoora",
-     "password":"u=4k)s&nen-&h#_3%_&+f#ieom(ztk$w)!#4azqruzofhavs99",
-     "auth_type":"password authentication",
-     "endpoint": "shoorabackend.caaj1e4fnlaq.ap-south-1.rds.amazonaws.com",
-     "port": "5432"
- }
+
+
+const DB_DETAILS = {
+    "database":process.env.database,
+    "username":process.env.username,
+    "password":process.env.password,
+    "auth_type":process.env.auth_type,
+    "endpoint": process.env.endpoint,
+    "port": process.env.port
+}
 
 
 const { Client } = require('pg');
