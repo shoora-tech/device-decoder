@@ -4,26 +4,26 @@ app.use(express.json());
 const { randomUUID } = require('crypto');
 require('dotenv').config();
 
-const DB_DETAILS = {
-    "database":process.env.database,
-    "username":process.env.username,
-    "password":process.env.password,
-    "auth_type":process.env.auth_type,
-    "endpoint": process.env.endpoint,
-    "port": process.env.port
-}
+// const DB_DETAILS = {
+//     "database":process.env.database,
+//     "username":process.env.username,
+//     "password":process.env.password,
+//     "auth_type":process.env.auth_type,
+//     "endpoint": process.env.endpoint,
+//     "port": process.env.port
+// }
 
-const { Client } = require('pg');
+// const { Client } = require('pg');
 
-const db_client = new Client({
-    user: DB_DETAILS.username,
-    host: DB_DETAILS.endpoint,
-    database: DB_DETAILS.database,
-    password: DB_DETAILS.password,
-    port: 5432,
-});
+// const db_client = new Client({
+//     user: DB_DETAILS.username,
+//     host: DB_DETAILS.endpoint,
+//     database: DB_DETAILS.database,
+//     password: DB_DETAILS.password,
+//     port: 5432,
+// });
 
-db_client.connect();
+// db_client.connect();
 
 const redis = require('redis');
 
@@ -213,7 +213,7 @@ function GeoFunction(imei, spotCoordinates, db_client){
         
 }
 // ["26.79296", "79.02924"]
-GeoFunction("784087664163", ["40.79296", "79.02924"], db_client)
+// GeoFunction("784087664163", ["40.79296", "79.02924"], db_client)
 
 
 // function InsideGeoChecker(current ){}
