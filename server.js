@@ -274,6 +274,8 @@ async function insertSQSDataInDB(data,uuid) {
           return true;
 
       });
+
+      if(data.is_corrupt == false){
       
       const update_latest_rt_query = `INSERT INTO alert_latestgps (location_packet_type, message_body_length, imei,
                                       message_serial_number, alarm_series, terminal_status,
@@ -313,6 +315,7 @@ async function insertSQSDataInDB(data,uuid) {
         return true;
 
     });
+  }
   }
     
 
