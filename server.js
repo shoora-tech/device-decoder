@@ -275,11 +275,11 @@ async function insertSQSDataInDB(data,uuid) {
 
       });
       
-      const update_latest_rt_query = `INSERT INTO alert_latestgps (uuid, location_packet_type, message_body_length, imei,
+      const update_latest_rt_query = `INSERT INTO alert_latestgps (location_packet_type, message_body_length, imei,
                                       message_serial_number, alarm_series, terminal_status,
                                       ignition_status, latitude, longitude, height, speed,
                                       direction, created_at, updated_at, is_corrupt, raw_hex_data, device_time, organization_id)
-                              VALUES ('${uuid}', ${data.locationPacketType}, '${data.messageBodyLength}',
+                              VALUES (${data.locationPacketType}, '${data.messageBodyLength}',
                               '${data.phoneNumber}', '${data.msgSerialNumber}', '${data.alarmSeries}',
                               '${data.terminalStatus}', ${iStatus}, ${data.latitute}, ${data.longitute},
                               ${data.height}, ${data.speed}, ${data.direction}, '${date}', '${date}', '${data.is_corrupt}', '${data.raw_hex_data}', '${data.device_time}', ${org_id})
