@@ -5,6 +5,7 @@ var id;
 var AWS = require('aws-sdk');
 const { resolve } = require("path");
 const { randomUUID } = require('crypto'); // Added in: node v14.17.0
+const geofence = require('./geofence.js')
 
 
 AWS.config.update({
@@ -314,6 +315,9 @@ async function insertSQSDataInDB(data,uuid) {
         return true;
 
     });
+    // check for geofence
+    cordinates = [data.latitute, data.longitute]
+    geofence.GeoFunction(`'${data.phoneNumber}'`, cordinates, client)
   }
   }
     

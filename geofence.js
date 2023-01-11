@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 app.use(express.json());
+const { randomUUID } = require('crypto');
 
 const DB_DETAILS = {
     "database":"shoora_fleet_management",
@@ -11,260 +12,253 @@ const DB_DETAILS = {
     "port": "5432"
 }
 
+const { Client } = require('pg');
+
+const db_client = new Client({
+    user: DB_DETAILS.username,
+    host: DB_DETAILS.endpoint,
+    database: DB_DETAILS.database,
+    password: DB_DETAILS.password,
+    port: 5432,
+});
+
+db_client.connect();
+
 const redis = require('redis');
-const { promisifyAll } = require('bluebird');
 
-// promisifyAll(redis);
-
-// const runApplication = async () => {
-//     // Connect to redis at 127.0.0.1 port 6379 no password.
-//     let imei = "784087664163"
-//     let key = "geofence_"+imei
-//     const client = redis.createClient();
-
-//     await client.setAsync('foo', 'bar');
-//     const fooValue = await client.getAsync('foo');
-//     // iteratte over it and check for geofence status
-//     // const geos = await client.lRange(key, 0, -1)
-//     // const geos = await client.lRange
-//     // for(const val of geos){
-//     //     console.log("geos ", val)
-//     // }
-//     console.log(fooValue);
-// };
-
-// runApplication();
+// const client = redis.createClient({
+//     host: '127.0.0.1',
+//     port: 6380
+// });
 
 const client = redis.createClient({
-    host: '127.0.0.1',
-    port: 6380
+    host: '13.235.36.201',
+    port: 6379,
+    password: "shoora123"
 });
-// client['auth'] = null;
 
-let x = client.get('foo', (err, reply) => {
-    if (err) throw err;
-        console.log(reply);
-})
-client.lrange('geofence_784087664163', 0, -1, (err, reply) => {
-    if (err) throw err;
-        console.log(reply);
-        reply.forEach(geo => {
-            console.log("geo is ", geo)
-            // fetch related geo data
-            client.get(geo, (err, data) => {
-                if(err) throw err;
-                console.log(data)
-            })
-        });
-})
+function degreesToRadians(degrees) {
+    return degrees * Math.PI / 180;
+  }
 
-// method to fetch geos
-function GeoFunction(imei){
-    client.lrange('geofence_784087664163', 0, -1, (err, reply) => {
-        if (err) throw err;
-            console.log(reply);
-            reply.forEach(geo => {
-                // fetch related geo data
-                client.get(geo, (err, data) => {
-                    if(err) throw err;
-                    console.log(data)
-                })
-            });
-    })
+function distanceInKmBetweenEarthCoordinates(lat1, lon1, lat2, lon2) {
+    var earthRadiusKm = 6371;
+
+    var dLat = degreesToRadians(lat2-lat1);
+    var dLon = degreesToRadians(lon2-lon1);
+
+    lat1 = degreesToRadians(lat1);
+    lat2 = degreesToRadians(lat2);
+
+    var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2); 
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+    return earthRadiusKm * c;
 }
 
-// console.log(x)
+function checkIfInside(spotCoordinates, center, radius) {
+
+    console.log(spotCoordinates)
+    console.log(center)
+
+    let newRadius = distanceInKmBetweenEarthCoordinates(parseFloat(spotCoordinates[0]), parseFloat(spotCoordinates[1]), center.lat, center.lng);
+    console.log(newRadius)
+
+    if( newRadius < radius ) {
+        //point is inside the circle
+        return "inside"
+    }
+    else if(newRadius > radius) {
+        //point is outside the circle
+        return "outside"
+    }
+    else {
+        //point is on the circle
+        return "on the circle"
+    }
+
+}
 
 
-// const { Client } = require('pg');
+function createGeoAlert(db_client, data){
+    var date = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    let uuid = randomUUID();
+    const query = `INSERT INTO alert_geofencealert (uuid, alert_type, latitude, longitude,
+        device_id, geofence_id, created_at, updated_at)
+        VALUES ('${uuid}', '${data.alert_type}', '${data.latitude}','${data.longitude}', ${data.device_id}, ${data.geofence_id}, '${date}', '${date}')
+        `;
+    console.log("alert query ", query)
 
-// const client = new Client({
-//     user: DB_DETAILS.username,
-//     host: DB_DETAILS.endpoint,
-//     database: DB_DETAILS.database,
-//     password: DB_DETAILS.password,
-//     port: 5432,
-// });
+        db_client.query(query, (err, res) => {
+        if (err) {
+        console.error("rt error ",err);
+        return;
+        }
+        console.log('Data insert successful');
+        return true;
 
-// client.connect();
-
-
-
-// //READ Request Handlers
-// app.get('/', async (req, res) => {
-//     console.log('sqsData--')
-
-
-
-
-// });
-
-
-// app.post('/process-geofence', async(req, res) => {
-//     console.log('post')
-
-// 	console.log(JSON.stringify(req.body))
-//     imei = req.body.imei
-//     // grab all the associated geofences
-//     // check if this device is in geofence or out of geofence
-//     var olddata =[]
-//     var alter = [601,603,605,607,619,621,623,625,627]
-
-//     for (var item of req.body.alarmlist){
-//         var output = olddata.filter(function(x){return x.DevIDNO==item.DevIDNO}); //arr here is you result array
-//         if(!output.length>0){
-//             olddata.push({DevIDNO:item.DevIDNO})
-//             if(item.img != '0'){
-//                 var srcAtvalue = alter.filter(function(x){return x== parseInt(item.srcAt)});
-//                 if(srcAtvalue.length>0){
-//                     var datacheck = await selectSQSDataInDB(item)
-//                     if(!datacheck){
-//                         var insertdata = await insertSQSDataInDB(item)
-
-//                     }else {
-//                         var updatedata = await upodateSQSDataInDB(item)
-//                     }
-
-
-//                 }else {
-//                     var stTypevalue = alter.filter(function(x){return x== parseInt(item.stType)});
-//                     if(stTypevalue.length>0){
-//                         var datacheck = await selectSQSDataInDB(item)
-//                         if(!datacheck){
-//                             var insertdata = await insertSQSDataInDB(item)
-
-//                         }else {
-//                             var updatedata = await upodateSQSDataInDB(item)
-//                         }
-
-
-//                     }else {
-//                         var typevalue = alter.filter(function(x){return x== parseInt(item.type)});
-//                         if(typevalue.length>0){
-//                             var datacheck = await selectSQSDataInDB(item)
-//                             if(!datacheck){
-//                                 var insertdata = await insertSQSDataInDB(item)
-
-//                             }else {
-//                                 var updatedata = await upodateSQSDataInDB(item)
-//                             }
-
-//                         }
-
-//                     }
-
-//                 }
+        });
+}
 
 
 
 
-//             }
-//         }
+
+// method to fetch geos
+function GeoFunction(imei, spotCoordinates, db_client){
+    const device_query = `
+        SELECT 
+            id 
+        FROM 
+            device_device 
+        WHERE 
+            device_device.imei_number='${imei}'`;
+    console.log("device query ", device_query)
+    db_client.query(device_query, (err, res) => {
+        if (err) {
+            console.error("unable to get vehicle error ", err);
+        }
+        console.log(res.rows.length)
+        if(res.rows.length > 0){
+            device_id = parseInt(res.rows[0].id);
+            // get geofence_id
+            
+            client.lrange('geofence_784087664163', 0, -1, (err, reply) => {
+                if (err) throw err;
+                    console.log(reply);
+                    reply.forEach(geo => {
+                        const geofence_query = `
+                            SELECT
+                                id
+                            FROM vehicle_geofence
+                            WHERE
+                                uuid='${geo}'
+                        `;
+                        console.log("geo query ", geofence_query)
+                        db_client.query(geofence_query, (err, res) => {
+                            if (err) {
+                                console.error("unable to get vehicle error ", err);
+                            }
+                            console.log(res.rows.length)
+                            if(res.rows.length > 0){
+                                geofence_id = parseInt(res.rows[0].id);
+
+                        // fetch related geo data
+                        client.get(geo, (err, data) => {
+                            if(err) throw err;
+                            console.log(data)
+                            // check if this is in geofence.
+                            // let spotCoordinates1 = [26.79296, 79.02924];
+                            var geo_array = data.split(',');
+                            let position = checkIfInside(spotCoordinates, {"lat":parseFloat(geo_array[0]), "lng":parseFloat(geo_array[1])}, parseInt(geo_array[2]))
+                            if(position == 'inside'){
+                                let out_key = 'outside_'+imei+'_'+geo
+                                // let outside = client.get(out_key)
+                                client.get(out_key, (err, outside) => {
+                                    if(err) throw err;
+                                    if(outside==true | outside=="true" | outside == null){
+                                        console.log("device is out of this fence and now entering for the first time")
+                                        // 1. set this imei as it's inside
+                                        let inside_key = 'inside_'+imei+'_'+geo
+                                        client.set(inside_key, true)
+                                        // 2. raise in geofence alert
+                                        let alert_obj = {}
+                                        alert_obj["alert_type"] = "in"
+                                        alert_obj["latitude"] = spotCoordinates[0]
+                                        alert_obj["longitude"] = spotCoordinates[0]
+                                        alert_obj["device_id"] = device_id
+                                        alert_obj["geofence_id"] = geofence_id
+                                        createGeoAlert(db_client, alert_obj)
+                                        // 3. set redis outside key to false
+                                        client.set(out_key, false)
+                                    }
+                                });
+                            }
+                            else if(position == "outside"){
+                                // check if earlier it was inside
+                                let inside_key = 'inside_'+imei+'_'+geo
+                                // let inside = client.get(inside_key)
+                                client.get(inside_key, (err, inside) => {
+                                    if(err) throw err;
+                                    console.log(inside=="true")
+                                    if(inside == "true" | inside ==true | inside == null){
+                                        console.log("device is inside of this fence and now exiting for the first time")
+                                        // 1. raise out geofence alert
+                                        let alert_obj = {}
+                                        alert_obj["alert_type"] = "out"
+                                        alert_obj["latitude"] = spotCoordinates[0]
+                                        alert_obj["longitude"] = spotCoordinates[0]
+                                        alert_obj["device_id"] = device_id
+                                        alert_obj["geofence_id"] = geofence_id
+                                        createGeoAlert(db_client, alert_obj)
+    
+                                        // 2. set outside_key
+                                        let outside_key = 'outside_'+imei+'_'+geo
+                                        client.set(outside_key, true)
+                
+                                        // 3. delete redis inside key
+                                        client.set(inside_key, false)
+                                    }
+                                });
+                            }
+            
+                        })
+                    }
+                });
+                    });
+            })
+        }
+    });
+        
+}
+// ["26.79296", "79.02924"]
+// GeoFunction("784087664163", ["40.79296", "79.02924"], db_client)
 
 
+// function InsideGeoChecker(current ){}
 
+// let spotCoordinates1 = [41.5408446218337, -8.612296123028727];
+// let spotCoordinates2 = [38.817459, -9.282218]
+
+// let center = {lat: 41.536558, lng: -8.627487};
+// let radius = 25
+
+// checkIfInside(spotCoordinates1);
+// checkIfInside(spotCoordinates2);
+
+// function checkIfInside(spotCoordinates) {
+
+//     let newRadius = distanceInKmBetweenEarthCoordinates(spotCoordinates[0], spotCoordinates[1], center.lat, center.lng);
+//     console.log(newRadius)
+
+//     if( newRadius < radius ) {
+//         //point is inside the circle
+//         console.log('inside')
 //     }
-//     res.send(req.body)
-
-// });
-
-
-// async function selectSQSDataInDB (data) {
-//     return new Promise((resolve) => {
-
-//         try {
-//             var query = "SELECT * FROM alert_rawalert where alert_guid = '"+data.guid+"'"
-//             client.query(query, function (err, res) {
-//                 if (err) {
-//                     console.error(err);
-//                     resolve(false);
-//                 }
-//                 console.log('Data check successful',res.rows.length);
-//                 if (res.rows.length > 0) {
-//                     console.log('true');
-//                     resolve(true);
-//                 } else {
-//                     console.log('false');
-//                     resolve(false);
-//                 }
-
-//             });
-
-//         } catch (error) {
-//             console.error('Something went Wrong :', error);
-//             resolve(false)
-//         }
-//     });
+//     else if(newRadius > radius) {
+//         //point is outside the circle
+//         console.log('outside')
+//     }
+//     else {
+//         //point is on the circle
+//         console.log('on the circle')
+//     }
 
 // }
 
-// async function insertSQSDataInDB(data) {
-//     return new Promise((resolve) => {
+// function distanceInKmBetweenEarthCoordinates(lat1, lon1, lat2, lon2) {
+//   var earthRadiusKm = 6371;
 
-//         try {
+//   var dLat = degreesToRadians(lat2-lat1);
+//   var dLon = degreesToRadians(lon2-lon1);
 
-//             var date = new Date().toISOString().slice(0, 19).replace('T', ' ');
+//   lat1 = degreesToRadians(lat1);
+//   lat2 = degreesToRadians(lat2);
 
-//             const query = `INSERT INTO alert_rawalert (device_id_no, alert_latitude, alert_longitude,
-//                                                        alert_description, alert_guid, hd,
-//                                                        info, img, p1, p2, p3,
-//                                                        p4, rve, alert_type_1, src_tm, alert_type_2, time, alert_type_3,
-//                                                        created_at, updated_at)
-//                            VALUES ('${data.DevIDNO}', '${data.Gps.mlat}', '${data.Gps.mlng}',
-//                                    '${data.desc}', '${data.guid}', '${data.hd}',
-//                                    '${data.info}', '${data.img}', '${data.p1}', '${data.p2}', '${data.p3}', '${data.p4}',
-//                                    '${data.rve}', '${data.srcAt}', '${data.srcTm}', '${data.stType}', '${data.time}', '${data.type}',
-//                                    '${date}', '${date}')
-//             `;
-
-
-
-//             client.query(query, (err, res) => {
-//                 if (err) {
-//                     //console.error(err);
-//                     resolve(false);
-//                 }
-//                 console.log('Data insert successful');
-//                 resolve(true);
-
-//             });
-
-//         } catch (error) {
-//             console.error('Something went Wrong :', error);
-//             resolve(false)
-//         }
-//     });
-// }
-
-// async function upodateSQSDataInDB(data) {
-//     return new Promise((resolve) => {
-
-//         try {
-
-
-//             var date = new Date().toISOString().slice(0, 19).replace('T', ' ');
-
-//             var query  = "UPDATE alert_rawalert SET  updated_at  = '"+date+"' WHERE alert_guid = '"+data.guid+"'";
-
-//             client.query(query, function (err, res) {
-//                 if (err) {
-//                     console.error(err);
-//                     resolve(false);
-//                 }
-//                 console.log('Update successful' );
-//                 resolve(true)
-
-//             });
-
-//         } catch (error) {
-//             console.error('Something went Wrong :', error);
-//             resolve(false)
-//         }
-
-//     });
+//   var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+//           Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2); 
+//   var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+//   return earthRadiusKm * c;
 // }
 
 
-//PORT ENVIRONMENT VARIABLE
-// const port = process.env.PORT || 3005;
-// app.listen(port, () => console.log(`Listening on port ${port}..`));
