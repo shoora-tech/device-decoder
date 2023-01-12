@@ -320,7 +320,7 @@ async function insertSQSDataInDB(data,uuid) {
     });
     // check for geofence
     cordinates = [data.latitute, data.longitute]
-    geofence.GeoFunction(`'${data.phoneNumber}'`, cordinates, client)
+    geofence.GeoFunction(data.phoneNumber, cordinates, client)
   }
   }
     
