@@ -12,7 +12,7 @@ AWS.config.update({
     region: process.env.region,
     accessKeyId: process.env.accessKeyId,
     secretAccessKey: process.env.secretAccessKey,
-    endpoint: new AWS.Endpoint(process.env.endpoint),
+    endpoint: new AWS.Endpoint(process.env.sqs_endpoint),
 });
 
 
@@ -32,10 +32,11 @@ const DB_DETAILS = {
     "username":process.env.username,
     "password":process.env.password,
     "auth_type":process.env.auth_type,
-    "endpoint": process.env.endpoint,
+    "endpoint": process.env.db_endpoint,
     "port": process.env.port
 }
 
+console.log(DB_DETAILS)
 
 const { Client } = require('pg');
 
