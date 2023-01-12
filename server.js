@@ -36,7 +36,7 @@ const DB_DETAILS = {
     "port": process.env.port
 }
 
-console.log(DB_DETAILS)
+// console.log(DB_DETAILS)
 
 const { Client } = require('pg');
 
