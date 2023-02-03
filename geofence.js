@@ -164,7 +164,7 @@ function GeoFunction(imei, spotCoordinates, db_client){
                                         client.set(inside_key, true)
                                         // 2. raise in geofence alert
                                         let alert_obj = {}
-                                        alert_obj["alert_type"] = "in"
+                                        alert_obj["alert_type"] = "IN_ALERT"
                                         alert_obj["latitude"] = spotCoordinates[0]
                                         alert_obj["longitude"] = spotCoordinates[0]
                                         alert_obj["device_id"] = device_id
@@ -186,7 +186,7 @@ function GeoFunction(imei, spotCoordinates, db_client){
                                         console.log("device is inside of this fence and now exiting for the first time")
                                         // 1. raise out geofence alert
                                         let alert_obj = {}
-                                        alert_obj["alert_type"] = "out"
+                                        alert_obj["alert_type"] = "OUT_ALERT"
                                         alert_obj["latitude"] = spotCoordinates[0]
                                         alert_obj["longitude"] = spotCoordinates[0]
                                         alert_obj["device_id"] = device_id
