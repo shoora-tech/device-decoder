@@ -151,25 +151,30 @@ function handlerLotin(connection){
 
            let timeString = data.slice(70, 82);
            var split = timeString.replace(/.{2}/g, '$&-').split('-');
-           var date = '';
-           var time = '';
-           for(var i = 0; i<3;i++){
-             if(date == ''){
-               date += split[i];
-             }else{
-               date += '-'+split[i];
-             }
-           }
-       
-           for(var i = 3; i<6; i++){
-             if(time == ''){
-               time += split[i];
-             }else{
-               time += ':'+split[i];
-             }
-           }
+          // console.log(split);
+          var date = '';
+          var time = '';
+          for(var i = 0; i<3;i++){
+          if(date == ''){
+            date += split[i];
+          }else{
+            date += '-'+split[i];
+          }
+          }
+
+          for(var i = 3; i<6; i++){
+          if(time == ''){
+            time += split[i];
+          }else{
+            time += ':'+split[i];
+          }
+          }
+          var raw = "20"+date + "T" + time;
+          let ist = new Date(raw)
+          ist.setHours(ist.getHours()-5);
+          ist.setMinutes(ist.getMinutes()-30);
           //  converted in ISO
-          let isoTime = new Date(date + " " + time);
+          let isoTime = ist.toISOString();
           // console.log(time.getDate() +'/'+ time.getMonth() +'/'+ ime.getFullYear()+ ' '+ time.getHours() + ':' + time.getMinutes());
            deviceDataObj['time'] = isoTime
            //deviceDataObj['additionalInf'] = data.slice(82, 130);
