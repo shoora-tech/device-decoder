@@ -168,7 +168,10 @@ function handlerLotin(connection){
                time += ':'+split[i];
              }
            }
-           deviceDataObj['time'] = date+' '+time;
+          //  converted in ISO
+          let isoTime = new Date(date + " " + time);
+          // console.log(time.getDate() +'/'+ time.getMonth() +'/'+ ime.getFullYear()+ ' '+ time.getHours() + ':' + time.getMinutes());
+           deviceDataObj['time'] = isoTime
            //deviceDataObj['additionalInf'] = data.slice(82, 130);
            //deviceDataObj['additionalInfId'] = data.slice(82, 84);
            //deviceDataObj['additionalInfLength'] = parseInt(data.slice(84, 86),16);
@@ -249,11 +252,11 @@ async function insertSQSDataInDB(data,uuid) {
       const query = `INSERT INTO alert_realtimedatabase (uuid, location_packet_type, message_body_length, imei,
                                                           message_serial_number, alarm_series, terminal_status,
                                                           ignition_status, latitude, longitude, height, speed,
-                                                          direction, created_at, updated_at, is_corrupt, raw_hex_data, device_time, organization_id)
+                                                          direction, created_at, updated_at, is_corrupt, raw_hex_data, device_time, organization_id, gps_datetime)
                       VALUES ('${uuid}', ${data.locationPacketType}, '${data.messageBodyLength}',
                               '${data.phoneNumber}', '${data.msgSerialNumber}', '${data.alarmSeries}',
                               '${data.terminalStatus}', ${iStatus}, ${data.latitute}, ${data.longitute},
-                              ${data.height}, ${data.speed}, ${data.direction}, '${date}', '${date}', '${data.is_corrupt}', '${data.raw_hex_data}', '${data.device_time}', ${org_id})
+                              ${data.height}, ${data.speed}, ${data.direction}, '${date}', '${date}', '${data.is_corrupt}', '${data.raw_hex_data}', '${data.device_time}', ${org_id}, '${data.time}')
       `;
 
         client.query(query, (err, res) => {
@@ -284,11 +287,11 @@ async function insertSQSDataInDB(data,uuid) {
       const update_latest_rt_query = `INSERT INTO alert_latestgps (location_packet_type, message_body_length, imei,
                                       message_serial_number, alarm_series, terminal_status,
                                       ignition_status, latitude, longitude, height, speed,
-                                      direction, created_at, updated_at, is_corrupt, raw_hex_data, device_time, organization_id)
+                                      direction, created_at, updated_at, is_corrupt, raw_hex_data, device_time, organization_id, gps_datetime)
                               VALUES (${data.locationPacketType}, '${data.messageBodyLength}',
                               '${data.phoneNumber}', '${data.msgSerialNumber}', '${data.alarmSeries}',
                               '${data.terminalStatus}', ${iStatus}, ${data.latitute}, ${data.longitute},
-                              ${data.height}, ${data.speed}, ${data.direction}, '${date}', '${date}', '${data.is_corrupt}', '${data.raw_hex_data}', '${data.device_time}', ${org_id})
+                              ${data.height}, ${data.speed}, ${data.direction}, '${date}', '${date}', '${data.is_corrupt}', '${data.raw_hex_data}', '${data.device_time}', ${org_id}, '${data.time}')
                               ON CONFLICT (imei)
                               DO
                                 UPDATE SET
@@ -320,7 +323,7 @@ async function insertSQSDataInDB(data,uuid) {
     });
     // check for geofence
     cordinates = [data.latitute, data.longitute]
-    geofence.GeoFunction(data.phoneNumber, cordinates, client)
+    // geofence.GeoFunction(data.phoneNumber, cordinates, client)
   }
   }
     
