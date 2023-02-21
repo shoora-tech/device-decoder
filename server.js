@@ -100,6 +100,23 @@ function handlerLotin(connection){
            deviceDataObj['alarmSeries'] = data.slice(26, 34);
            deviceDataObj['terminalStatus'] = data.slice(34, 42);
 	         let terminalStatus = utils.Hex2BinStr(deviceDataObj['terminalStatus']);
+           let reverseTerminalStatus = terminalStatus.split("").reverse().join("")
+           deviceDataObj['ignitionStatus'] = parseInt(reverseTerminalStatus.slice(0, 1));
+           deviceDataObj['latitude_d'] = parseInt(reverseTerminalStatus.slice(2, 3));
+           deviceDataObj['longitude_d'] = parseInt(reverseTerminalStatus.slice(3, 4));
+           if(deviceDataObj['latitude_d'] == 0){
+            deviceDataObj['latitute'] = (parseInt(data.slice(42, 50),16)/1000000).toString();
+           }else{
+              deviceDataObj['latitute'] = (0 - parseInt(data.slice(42, 50),16)/1000000).toString();
+           }
+           if(deviceDataObj['latitude_d'] == 0){
+              deviceDataObj['longitute'] = (parseInt(data.slice(50, 58),16)/1000000).toString();
+           }else{
+              deviceDataObj['longitute'] = (0 - parseInt(data.slice(50, 58),16)/1000000).toString();
+           }
+           /*
+           20th Feb, debugging showed ignition status was incorrect
+
 	         deviceDataObj['ignitionStatus'] = parseInt(terminalStatus.slice(9, 10));
            deviceDataObj['latitude_d'] = parseInt(terminalStatus.slice(2, 3));
            deviceDataObj['longitude_d'] = parseInt(terminalStatus.slice(3, 4));
@@ -113,6 +130,7 @@ function handlerLotin(connection){
           }else{
               deviceDataObj['longitute'] = (0 - parseInt(data.slice(50, 58),16)/1000000).toString();
           }
+          */
           deviceDataObj['height'] = parseInt(data.slice(58, 62),16);
           deviceDataObj['speed'] = parseInt(data.slice(62, 66),16)/10;
           deviceDataObj['direction'] = parseInt(data.slice(66, 70),16);
