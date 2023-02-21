@@ -68,11 +68,7 @@ function handlerLotin(connection){
     console.log(err.stack)
   });
   connection.on('data',async function (data) {
-    // data = "7e02000038784087664106013c00000000000c000101b02fbb048bd2aa00ee0000000022110614335701040001a33b01040001a33b03020000300199310106250400000000537e";
     try{
-	//console.log(connection);
-	//console.log('DATA ' + connection.remoteAddress + ': ' + data);
-        //console.log('data before hex conversion',data);
         data = data.toString('hex');
         let dataLength = data.length
         let dataLengthFlag = data.slice(8, 10)
@@ -95,21 +91,6 @@ function handlerLotin(connection){
           if(dataLengthFlag === '3c' && dataLength === 150){
             deviceDataObj["dataInsertionFlag"] = true
           }
-          // if(dataLengthFlag === '32' && dataLength === 132){
-          //   deviceDataObj["dataInsertionFlag"] = false
-          // }
-          // if(dataLengthFlag === '34' && dataLength === 136){
-          //   deviceDataObj["dataInsertionFlag"] = false
-          // }
-          // if(dataLengthFlag === '36' && dataLength === 140){
-          //   deviceDataObj["dataInsertionFlag"] = false
-          // }
-          // if(dataLengthFlag === '38' && dataLength === 144){
-          //   deviceDataObj["dataInsertionFlag"] = false
-          // }
-          // if(dataLengthFlag === '3c' && dataLength === 152){
-          //   deviceDataObj["dataInsertionFlag"] = false
-          // }
            deviceDataObj['uuid'] = randomUUID();
            deviceDataObj['identifier'] = data.slice(0, 2);
            deviceDataObj['locationPacketType'] = parseInt(data.slice(2, 4),16);
@@ -118,86 +99,69 @@ function handlerLotin(connection){
            deviceDataObj['msgSerialNumber'] = data.slice(22, 26);
            deviceDataObj['alarmSeries'] = data.slice(26, 34);
            deviceDataObj['terminalStatus'] = data.slice(34, 42);
-           //console.log('terminal status',deviceDataObj['terminalStatus']);
-	   let terminalStatus = utils.Hex2BinStr(deviceDataObj['terminalStatus']);
-           //console.log(terminalStatus.length);
-           //console.log('terminal status',terminalStatus);
-	   //console.log('Anubhaw',terminalStatus.slice(9, 10))
-	   deviceDataObj['ignitionStatus'] = parseInt(terminalStatus.slice(9, 10));
+	         let terminalStatus = utils.Hex2BinStr(deviceDataObj['terminalStatus']);
+	         deviceDataObj['ignitionStatus'] = parseInt(terminalStatus.slice(9, 10));
            deviceDataObj['latitude_d'] = parseInt(terminalStatus.slice(2, 3));
-	   //console.log("ignition status is -> ", deviceDataObj['ignitionStatus'])
            deviceDataObj['longitude_d'] = parseInt(terminalStatus.slice(3, 4));
-	   if(deviceDataObj['latitude_d'] == 0){
-	      deviceDataObj['latitute'] = (parseInt(data.slice(42, 50),16)/1000000).toString();
-	   }else{
-	      deviceDataObj['latitute'] = (0 - parseInt(data.slice(42, 50),16)/1000000).toString();
-	   }
-
-	   if(deviceDataObj['latitude_d'] == 0){
-		deviceDataObj['longitute'] = (parseInt(data.slice(50, 58),16)/1000000).toString();
-	   }else{
-		deviceDataObj['longitute'] = (0 - parseInt(data.slice(50, 58),16)/1000000).toString();
-	   }
-
-
-           //deviceDataObj['latitute'] = parseInt(data.slice(42, 50),16)/1000000;
-           //deviceDataObj['longitute'] = parseInt(data.slice(50, 58),16)/1000000;
-           deviceDataObj['height'] = parseInt(data.slice(58, 62),16);
-           deviceDataObj['speed'] = parseInt(data.slice(62, 66),16)/10;
-           deviceDataObj['direction'] = parseInt(data.slice(66, 70),16);
-           deviceDataObj['device_time'] = data.slice(70, 82);
-           deviceDataObj['created_at'] = new Date() ;
-           deviceDataObj['updated_at'] = new Date() ;
-
-           let timeString = data.slice(70, 82);
-           var split = timeString.replace(/.{2}/g, '$&-').split('-');
-          // console.log(split);
-          var date = '';
-          var time = '';
-          for(var i = 0; i<3;i++){
-          if(date == ''){
-            date += split[i];
+          if(deviceDataObj['latitude_d'] == 0){
+              deviceDataObj['latitute'] = (parseInt(data.slice(42, 50),16)/1000000).toString();
           }else{
-            date += '-'+split[i];
+              deviceDataObj['latitute'] = (0 - parseInt(data.slice(42, 50),16)/1000000).toString();
           }
-          }
-
-          for(var i = 3; i<6; i++){
-          if(time == ''){
-            time += split[i];
+          if(deviceDataObj['latitude_d'] == 0){
+              deviceDataObj['longitute'] = (parseInt(data.slice(50, 58),16)/1000000).toString();
           }else{
-            time += ':'+split[i];
+              deviceDataObj['longitute'] = (0 - parseInt(data.slice(50, 58),16)/1000000).toString();
           }
-          }
-          var raw = "20"+date + "T" + time;
-          let ist = new Date(raw)
-          ist.setHours(ist.getHours()-5);
-          ist.setMinutes(ist.getMinutes()-30);
-          //  converted in ISO
-          let isoTime = ist.toISOString();
-          // console.log(time.getDate() +'/'+ time.getMonth() +'/'+ ime.getFullYear()+ ' '+ time.getHours() + ':' + time.getMinutes());
-           deviceDataObj['time'] = isoTime
-           //deviceDataObj['additionalInf'] = data.slice(82, 130);
-           //deviceDataObj['additionalInfId'] = data.slice(82, 84);
-           //deviceDataObj['additionalInfLength'] = parseInt(data.slice(84, 86),16);
-           deviceDataObj['mileage'] = parseInt(data.slice(86, 94),16)/10;
-           //deviceDataObj['unknownadditionalInfId'] = data.slice(94, 96);
-           //deviceDataObj['unknownadditionalInfLength'] = parseInt(data.slice(96, 98),16);
-           deviceDataObj['gsmNetworkStrength'] = parseInt(data.slice(98, 102),16);
-           deviceDataObj['numberofSatelite'] = parseInt(data.slice(124, 126),16);
-           var params = {
-            MessageBody: JSON.stringify(deviceDataObj),
-            QueueUrl: queryURL
-           };
+          deviceDataObj['height'] = parseInt(data.slice(58, 62),16);
+          deviceDataObj['speed'] = parseInt(data.slice(62, 66),16)/10;
+          deviceDataObj['direction'] = parseInt(data.slice(66, 70),16);
+          deviceDataObj['device_time'] = data.slice(70, 82);
+          deviceDataObj['created_at'] = new Date() ;
+          deviceDataObj['updated_at'] = new Date() ;
 
-           if(deviceDataObj["dataInsertionFlag"]){
+          deviceDataObj['mileage'] = parseInt(data.slice(86, 94),16)/10;
+          deviceDataObj['gsmNetworkStrength'] = parseInt(data.slice(98, 102),16);
+          deviceDataObj['numberofSatelite'] = parseInt(data.slice(124, 126),16);
+          var params = {
+          MessageBody: JSON.stringify(deviceDataObj),
+          QueueUrl: queryURL
+          };
+          if(deviceDataObj["dataInsertionFlag"]){
             deviceDataObj["is_corrupt"] = false
+            let timeString = data.slice(70, 82);
+            var split = timeString.replace(/.{2}/g, '$&-').split('-');
+            var date = '';
+            var time = '';
+            for(var i = 0; i<3;i++){
+            if(date == ''){
+              date += split[i];
+            }else{
+              date += '-'+split[i];
+            }
+            }
+
+            for(var i = 3; i<6; i++){
+            if(time == ''){
+              time += split[i];
+            }else{
+              time += ':'+split[i];
+            }
+            }
+            var raw = "20"+date + "T" + time;
+            let ist = new Date(raw)
+            ist.setHours(ist.getHours()-5);
+            ist.setMinutes(ist.getMinutes()-30);
+            //  converted in ISO
+            let isoTime = ist.toISOString();
+            deviceDataObj['time'] = isoTime
+            await insertSQSDataInDB(deviceDataObj,deviceDataObj.uuid)
             
-           }
-           else{
+          }
+          else{
             deviceDataObj["is_corrupt"] = true
-           }
-           await insertSQSDataInDB(deviceDataObj,deviceDataObj.uuid)
+          }
+          // await insertSQSDataInDB(deviceDataObj,deviceDataObj.uuid)
             
         }
      }
@@ -242,17 +206,17 @@ async function insertSQSDataInDB(data,uuid) {
         }
   // fetch organization_id from the imei number
   const org_query = `SELECT organization_id from device_device WHERE imei_number='${data.phoneNumber}'`
-  console.log("org query ", org_query)
+  // console.log("org query ", org_query)
   client.query(org_query, (err, res) => {
     if (err) {
         console.error("unable to get org error ", err);
     }
-    console.log("organization found")
+    // console.log("organization found")
     console.log(res.rows.length)
     if(res.rows.length > 0){
       org_id = parseInt(res.rows[0].organization_id);
-      console.log("organization id is ")
-      console.log(org_id)
+      // console.log("organization id is ")
+      // console.log(org_id)
       var date = new Date().toISOString().slice(0, 19).replace('T', ' ');
       const query = `INSERT INTO alert_realtimedatabase (uuid, location_packet_type, message_body_length, imei,
                                                           message_serial_number, alarm_series, terminal_status,
@@ -276,7 +240,7 @@ async function insertSQSDataInDB(data,uuid) {
         // Insert data in device table, gps_id, and device_status
         
         const update_query = `UPDATE device_device SET ignition_status = ${iStatus}, speed= ${data.speed}, last_device_status_timestamp= '${date}' WHERE imei_number = '${data.phoneNumber}';`
-        console.log("update query -> ", update_query)
+        // console.log("update query -> ", update_query)
         client.query(update_query, (err, res) => {
           if (err) {
               console.error("update error ", err);
